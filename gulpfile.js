@@ -10,7 +10,11 @@ var gulp = require('gulp'),
 	  autoprefixer = require('gulp-autoprefixer'),
 	  browserSync = require('browser-sync').create(),
 	  htmlreplace = require('gulp-html-replace'),
-	  cssmin = require('gulp-cssmin');
+		cssmin = require('gulp-cssmin');
+		
+		var handlebars = require('gulp-handlebars');
+		var wrap = require('gulp-wrap');
+		var declare = require('gulp-declare');
 
 gulp.task("concatScripts", function() {
 	return gulp.src([
@@ -52,6 +56,7 @@ gulp.task("minifyCss", ["compileSass"], function() {
 
 gulp.task('watchFiles', function() {
   gulp.watch('assets/css/**/*.scss', ['compileSass']);
+  gulp.watch('source/templates/*.hbs', ['templates']);
   gulp.watch('assets/js/*.js', ['concatScripts']);
 })
 
@@ -78,15 +83,65 @@ gulp.task("build", ['minifyScripts', 'minifyCss'], function() {
 		.pipe(gulp.dest('dist'));
 });
 
+
+
+gulp.task('templates', function(){
+  gulp.src('source/templates/*.hbs')
+    .pipe(handlebars())
+    .pipe(wrap('Handlebars.template(<%= contents %>)'))
+    .pipe(declare({
+      namespace: 'MyApp.templates',
+      noRedeclare: true, // Avoid duplicate declarations
+    }))
+    .pipe(concat('templates.js'))
+    .pipe(gulp.dest('build/js/'));
+});
+
+
+
+
+gulp.task('handlebars', function () {
+	var templateData = {
+			firstName: 'Kaanon'
+	};
+	var options = {
+			ignorePartials: true, //ignores the unknown footer2 partial in the handlebars template, defaults to false
+			partials : {
+					// footer : '<footer>the end</footer>'
+			},
+			batch : ['./assets/templates'],
+			helpers : {
+					capitals : function(str){
+							return str.toUpperCase();
+					}
+			}
+	}
+
+	return gulp.src('/')
+		.pipe(handlebars(templateData, options))
+		.pipe(rename('hello.html'))
+		.pipe(gulp.dest('dist'));
+});
+
+
+
+
 gulp.task('serve', ['watchFiles'], function(){
   browserSync.init({
   	server: "./"
   });
 
-  gulp.watch("assets/css/**/*.scss", ['watchFiles']);
+	gulp.watch("assets/css/**/*.scss", ['watchFiles']);
+	gulp.watch("assets/templates/*.hbs", ['handlebars']);
   gulp.watch(['*.html', '*.php']).on('change', browserSync.reload);
 });
+
+
+
 
 gulp.task("default", ["clean", 'build'], function() {
   gulp.start('renameSources');
 });
+
+
+

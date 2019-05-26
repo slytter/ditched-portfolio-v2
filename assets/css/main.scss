@@ -17,3 +17,37 @@
 
 // 5 - Import layout  styles
 @import '5-layout/index';
+
+.center-flex{
+    display: flex;
+    justify-content: center;
+    &.vertical{
+        align-items: center;
+    }
+}
+
+.wrapper-small{
+    width: 100%;
+    max-width: 800px;
+    margin:0 20px 0 20px
+}
+.wrapper-large{
+    width: 100%;
+    max-width: 1000px;
+    margin:0 20px 0 20px
+}
+
+h1{
+    padding-top: 40px;
+    
+}
+
+
+.section-one{
+    height:100vh;
+    background-color: beige;
+}
+.section-two{
+    height:100vh;
+    background-color: rgb(189, 161, 110);
+}
